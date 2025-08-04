@@ -3,3 +3,8 @@ python-dotenv
 langchain
 streamlit
 pypdf
+sqlalchemy
+psycopg2
+pandas
+supabase
+pinecone

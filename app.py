@@ -1,7 +1,8 @@
 import streamlit as st
 import random
 import time
-from resume.resume import geminiresponse
+from resume.resume import geminiresponse,build_prompt,promptgetpersoninform
+from Database.database import DataBase
 from pypdf import PdfReader
 # def geminiresponsehistory(history):
 #     fullprompt = ""
@@ -15,32 +16,22 @@ st.title("ATS RESUME CHECKER")
 
 uploaded_file = st.file_uploader("Upload Your Resume to Enter The Database", type=["pdf"], label_visibility="collapsed")
 if uploaded_file:
+
+
     if uploaded_file.type=="application/pdf":
         reader=PdfReader(uploaded_file)
         #Most PDF are 1 page. this is for 1 page pdf for now. Will make it for multiple pages
         page = reader.pages[0] 
         page_content = page.extract_text()
         # st.write(page.extract_text())
-        
-
-system_prompt = """
-You are a helpful assistant. Remember user info (like name) and uploaded documents.
-"""
-
-def build_prompt(history, uploaded_text=""):
-    prompt = system_prompt + "\n\n"
-    for msg in history:
-        role = msg['role']
-        prompt += f"{role.capitalize()}: {msg['content']}\n"
-    if uploaded_text:
-        prompt += f"Uploaded file:\n\"\"\"\n{uploaded_text}\n\"\"\"\n"
-    prompt += "Assistant:"
-    return prompt
+        databaseloader=  DataBase(page_content)
+        upload = databaseloader.pushingdatabase()
+        st.write(upload)
 
 
 
 
-
+    
 
 
 # Initialize chat history
@@ -64,7 +55,7 @@ if prompt := st.chat_input("What is up?"):
     # Display assistant response in chat message container
     with st.chat_message("assistant"):
         # print(prompt)
-        text = geminiresponse(prompt)
+        # text = geminiresponse(prompt)
         # print(text)
         text = geminiresponse(build_prompt(st.session_state.messages, page_content))
 
