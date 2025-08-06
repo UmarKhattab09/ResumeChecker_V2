@@ -3,6 +3,7 @@ import random
 import time
 from resume.resume import geminiresponse,build_prompt,promptgetpersoninform
 from Database.database import DataBase
+from Database.embeddeddatabase import EmbeddedDatabase
 from pypdf import PdfReader
 # def geminiresponsehistory(history):
 #     fullprompt = ""
@@ -15,18 +16,34 @@ st.title("ATS RESUME CHECKER")
 
 
 uploaded_file = st.file_uploader("Upload Your Resume to Enter The Database", type=["pdf"], label_visibility="collapsed")
-if uploaded_file:
+if uploaded_file and uploaded_file.type == "application/pdf":
+    # Check if file has already been processed
+    if "resume_uploaded" not in st.session_state:
+        reader = PdfReader(uploaded_file)
+        page_content = ""
+        for page in reader.pages:
+            page_content += page.extract_text()
+
+        st.session_state.page_content = page_content
 
 
-    if uploaded_file.type=="application/pdf":
-        reader=PdfReader(uploaded_file)
-        #Most PDF are 1 page. this is for 1 page pdf for now. Will make it for multiple pages
-        page = reader.pages[0] 
-        page_content = page.extract_text()
-        # st.write(page.extract_text())
-        databaseloader=  DataBase(page_content)
+        # Push to DB
+        databaseloader = DataBase(page_content)
         upload = databaseloader.pushingdatabase()
-        st.write(upload)
+
+        # Push to Pinecone
+        pineconeloader = EmbeddedDatabase(page_content)
+        uploadv2 = pineconeloader.pushing()
+
+        # Mark as uploaded
+        st.session_state.resume_uploaded = True
+
+        st.success("Resume uploaded and embedded successfully!")
+        st.write("Database response:", upload)
+        st.write("Pinecone response:", uploadv2)
+    else:
+        st.info("Resume already uploaded in this session.")
+
 
 
 
@@ -57,7 +74,7 @@ if prompt := st.chat_input("What is up?"):
         # print(prompt)
         # text = geminiresponse(prompt)
         # print(text)
-        text = geminiresponse(build_prompt(st.session_state.messages, page_content))
+        text = geminiresponse(build_prompt(st.session_state.messages, st.session_state.page_content))
 
         response = st.write(text)
     # Add assistant response to chat history

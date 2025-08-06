@@ -11,11 +11,11 @@ import json
 from supabase import create_client, Client
 url: str = os.environ.get("SUPABASEURL")
 key: str = os.environ.get("SUPABASEKEY")
-reader=PdfReader("UmarKhattab_Resume.pdf")
+# reader=PdfReader("UmarKhattab_Resume.pdf")
 
 #Most PDF are 1 page. this is for 1 page pdf for now. Will make it for multiple pages
-page = reader.pages[0] 
-page_content = page.extract_text()
+# page = reader.pages[0] 
+# page_content = page.extract_text()
 
 
 class DataBase:
