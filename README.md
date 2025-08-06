@@ -1,3 +1,12 @@
+---
+title: ResumseMatchAI
+sdk: streamlit
+emoji: 🏃
+colorFrom: indigo
+colorTo: green
+sdk_version: 1.48.0
+---
+
 ## This is update of my old ResumeAtsChecker. 
 
 
